@@ -1,12 +1,9 @@
-import requests
-from datetime import datetime
 from slack_sdk import WebClient
 
-
 class SlackNotifier:
-    def __init__(self):
-        slack_token = ""
-        self.client = WebClient(slack_token)
+    def __init__(self, token):
+        self.token = token
+        self.client = WebClient(self.token)
 
     # slack_sdk function
     def get_channel_id(self, channel_name):
