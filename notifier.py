@@ -55,3 +55,5 @@ class SlackNotifier:
 
     def send_message(self, channel_id, text):
         response = self.client.chat_postMessage(channel=channel_id, text=text)
+        if response.ok == False:
+            print("Send Message Failed!")

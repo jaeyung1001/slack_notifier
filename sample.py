@@ -1,6 +1,7 @@
 import notifier
+
 if __name__ == '__main__':
     my_token = ""
-    channel_id = "jaeyung_channel"
+    channel_id = ""
     slack = notifier.SlackNotifier(my_token)
     slack.send_message(channel_id, "test from jaeyung pc")
