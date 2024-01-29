@@ -1,4 +1,5 @@
 from slack_sdk import WebClient
+from loguru import logger
 
 class SlackNotifier:
     def __init__(self, token):
@@ -59,9 +60,9 @@ class SlackNotifier:
     def send_simple_message(self, channel_name, text):
         response = self.client.chat_postMessage(channel=channel_name, text=text)
         if response['ok'] == False:
-            print("Send Message Failed!")
+            raise Exception("Send Message Failed!")
 
     def send_custom_message(self, channel_name, message_body):
         response = self.client.chat_postMessage(channel=channel_name, blocks=message_body)
         if response['ok'] == False:
-            print("Send Message Failed!")
+            raise Exception("Send Message Failed!")
