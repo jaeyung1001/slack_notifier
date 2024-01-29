@@ -1,4 +1,5 @@
 from slack_sdk import WebClient
+from loguru import logger
 
 class SlackNotifier:
     def __init__(self, token):
@@ -13,7 +14,7 @@ class SlackNotifier:
         # conversations_list() 메서드 호출
         # limit -> 조회 가능한 채널수 default : 100
         # https://api.slack.com/methods/conversations.list 
-        result = self.client.conversations_list(limit=2000, exclude_archived='true')
+        result = self.client.conversations_list(limit=200, exclude_archived='true')
         # 채널 정보 딕셔너리 리스트
         channels = result.data["channels"]
         channel_id = None
@@ -25,11 +26,12 @@ class SlackNotifier:
             raise Exception("None Exist Channel or Private Channel")
         return channel_id
 
-    def get_message_ts(self, channel_id, query):
+    def get_message_ts(self, channel_name, query):
         """
         슬랙 채널 내 메세지 조회
         """
         # conversations_history() 메서드 호출
+        channel_id = self.get_channel_id(channel_name)
         result = self.client.conversations_history(channel=channel_id)
         # 채널 내 메세지 정보 딕셔너리 리스트
         messages = result.data["messages"]
@@ -43,17 +45,24 @@ class SlackNotifier:
         message_ts = message["ts"]
         return message_ts
 
-    def post_thread_message(self, channel_id, message_ts, text):
+    def post_thread_message(self, channel_name, target_message, text):
         """
         슬랙 채널 내 메세지의 Thread에 댓글 달기
         """
+        channel_id = self.get_channel_id(channel_name)
+        target_message_ts = self.get_message_ts(channel_name, target_message)
         # chat_postMessage() 메서드 호출
         result = self.client.chat_postMessage(
-            channel=channel_id, text=text, thread_ts=message_ts
+            channel=channel_id, text=text, thread_ts=target_message_ts
         )
         return result
 
-    def send_message(self, channel_id, text):
-        response = self.client.chat_postMessage(channel=channel_id, text=text)
-        if response.ok == False:
-            print("Send Message Failed!")
+    def send_simple_message(self, channel_name, text):
+        response = self.client.chat_postMessage(channel=channel_name, text=text)
+        if response['ok'] == False:
+            raise Exception("Send Message Failed!")
+
+    def send_custom_message(self, channel_name, message_body):
+        response = self.client.chat_postMessage(channel=channel_name, blocks=message_body)
+        if response['ok'] == False:
+            raise Exception("Send Message Failed!")
